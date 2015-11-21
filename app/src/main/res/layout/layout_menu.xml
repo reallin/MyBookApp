@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+        <item
+            android:id="@+id/nav_blog"
+            android:icon="@drawable/ic_error_outline_black_36dp"
+            android:title="博客地址" />
+
+        <item
+            android:id="@+id/nav_ver"
+            android:icon="@drawable/ic_error_outline_black_36dp"
+            android:title="版本信息" />
+
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_error_outline_black_36dp"
+            android:title="关于我" />
+
+</menu>
