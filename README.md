@@ -4,12 +4,13 @@
 ![book](https://github.com/reallin/MyBookApp/blob/master/book1.png)
 ![book](https://github.com/reallin/MyBookApp/blob/master/book2.png)
 ##使用到的技术点
-###google新控件
+###google新控件的使用
   * toolbar
   * CoordinatorLayout
   * CoordinatorLayout
   * RecyclerView
   * FloatingActionButton等。
+
 ###豆瓣api的使用
   没什么说的，就是导入。
 ###gson解析数据
