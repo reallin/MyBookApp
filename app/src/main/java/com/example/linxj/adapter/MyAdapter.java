@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.linxj.Model.Book;
+import com.example.linxj.Model.BookData;
 import com.example.linxj.xmlpull.R;
 
 import java.util.List;
@@ -23,11 +23,11 @@ public interface onItemClickListener{
     this.monItemClickListener = onItemClickListener;
 }
 
-    private List<Book> books;
+    private List<BookData> books;
 
     private Context mContext;
 
-    public MyAdapter( Context context , List<Book> books)
+    public MyAdapter( Context context , List<BookData> books)
     {
         this.mContext = context;
         this.books = books;
@@ -46,8 +46,8 @@ public interface onItemClickListener{
     public void onBindViewHolder( final ViewHolder viewHolder,final int i )
     {
         // 给ViewHolder设置元素
-        Book p = books.get(i);
-        viewHolder.mTextView.setText(p.getName());
+        BookData p = books.get(i);
+        viewHolder.mTextView.setText(p.name);
         if(monItemClickListener != null){
             viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -66,6 +66,10 @@ public interface onItemClickListener{
         // 返回数据总数
        // return actors == null ? 0 : actors.size();
         return  books == null ? 0:books.size();
+    }
+
+    public void setList(List<BookData> bs){
+        this.books = bs;
     }
 
     // 重写的自定义ViewHolder

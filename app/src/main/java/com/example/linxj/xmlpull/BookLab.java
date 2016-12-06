@@ -1,8 +1,7 @@
 package com.example.linxj.xmlpull;
 
-import com.example.linxj.Model.Book;
+import com.example.linxj.Model.BookData;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +9,7 @@ import java.util.ArrayList;
  */
 public class BookLab {
     private static BookLab bookLab;
-    private ArrayList<Book> books = new ArrayList<Book>();
+    private ArrayList<BookData> books = new ArrayList<BookData>();
     private BookLab(){
     }
     public static BookLab newInstance(){
@@ -23,10 +22,10 @@ public class BookLab {
         }
         return bookLab;
     }
-    public void add(Book book){
+    public void add(BookData book){
         this.books.add(book);
     }
-    public ArrayList<Book> getBooks(){
+    public ArrayList<BookData> getBooks(){
         return books;
     }
 }

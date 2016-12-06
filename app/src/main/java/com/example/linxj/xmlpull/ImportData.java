@@ -1,7 +1,6 @@
 package com.example.linxj.xmlpull;
 
 import android.app.Activity;
-import android.media.audiofx.AcousticEchoCanceler;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,13 +9,10 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.activeandroid.ActiveAndroid;
-import com.example.linxj.Model.Book;
 import com.example.linxj.Model.BookData;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-
-import java.util.logging.LogRecord;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -40,8 +36,8 @@ public class ImportData extends Activity {
         setContentView(R.layout.importlayout);
         ButterKnife.bind(this);
         BookLab lab = (BookLab)this.getIntent().getSerializableExtra("Booklab");
-        ArrayList<Book> books = lab.getBooks();
-        final Iterator<Book> iterator = books.iterator();
+        List<BookData> books = lab.getBooks();
+        final Iterator<BookData> iterator = books.iterator();
         btnImport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,9 +50,9 @@ public class ImportData extends Activity {
                     ActiveAndroid.beginTransaction();
                     while (iterator.hasNext()) {
                         BookData book = new BookData();
-                        Book b = iterator.next();
-                        book.isbn = b.getIbsn();
-                        book.name = b.getName();
+                        BookData b = iterator.next();
+                        book.isbn = b.isbn;
+                        book.name = b.name;
                         //book.index = b.getIndex();
                     }
                     ActiveAndroid.setTransactionSuccessful();

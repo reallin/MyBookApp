@@ -75,5 +75,5 @@
         android:src="@drawable/ic_discuss"
         app:backgroundTintMode="multiply"
         app:layout_anchor="@id/appbar"
-        app:layout_anchorGravity="bottom|end|right"></android.support.design.widget.FloatingActionButton>
+        app:layout_anchorGravity="bottom|end|right"/>
     </android.support.design.widget.CoordinatorLayout>

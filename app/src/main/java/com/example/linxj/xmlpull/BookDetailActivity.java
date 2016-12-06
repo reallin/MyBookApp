@@ -1,23 +1,23 @@
 package com.example.linxj.xmlpull;
 
-import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.DialogInterface;
-import android.graphics.Outline;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.linxj.Model.BookData;
 import com.example.linxj.Model.BookInfo;
 import com.example.linxj.com.example.linxj.ui.ProgressHUD;
 import com.example.linxj.net.NetAssistant;
@@ -50,6 +50,9 @@ public class BookDetailActivity extends AppCompatActivity {
     LinearLayout txv;
     @Bind(R.id.tv_emptyview)
     TextView tvEmptyview;
+
+    @Bind(R.id.fabDetail)
+    FloatingActionButton mFab;
     Typeface mRobotoBold;
     Typeface mRobotoThin;
 
@@ -57,6 +60,9 @@ public class BookDetailActivity extends AppCompatActivity {
     @Bind(R.id.scrollView)
     ScrollView scrollView;
     private ProgressHUD mProgressHUD;
+    private boolean isAdd = false;
+    private String isbn;
+    private BookInfo info;
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -76,7 +82,7 @@ public class BookDetailActivity extends AppCompatActivity {
                 mRobotoThin = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Thin.ttf");
                 bookTitle.setTypeface(mRobotoBold);
                 bookAuthor.setTypeface(mRobotoThin);
-                BookInfo info = new MyJsonParse().parseInfoBook(msg.obj.toString());
+                info = new MyJsonParse().parseInfoBook(msg.obj.toString());
                 bookTitle.setText(info.getTitle().getTitle());
                 bookAuthor.setText(info.getAuthor().get(0).getName().getAuthorName());
                 bookAbstract.setText(info.getContent().getContent());
@@ -90,8 +96,15 @@ public class BookDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bookdetail);
         ButterKnife.bind(this);
+
+        if (this.getIntent().hasExtra("addBook")) {//添加book
+            mFab.setVisibility(View.VISIBLE);
+            isAdd = true;
+        } else {
+            mFab.setVisibility(View.GONE);
+        }
         mNetworkStatus = new NetworkConnectStatus(BookDetailActivity.this);
-        String isbn = this.getIntent().getStringExtra("isbn");
+        isbn = this.getIntent().getStringExtra("isbn");
         url = "http://api.douban.com/book/subject/isbn/" + isbn + "?alt=json";
         ExecutorService executor = Executors.newCachedThreadPool();
         if (mNetworkStatus.isConnectInternet()) {
@@ -127,7 +140,24 @@ public class BookDetailActivity extends AppCompatActivity {
                     Toast.makeText(BookDetailActivity.this, "SnackBar action", Toast.LENGTH_SHORT).show();
                 }
             });*/
+
         }
+
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                long currentTmie = SystemClock.currentThreadTimeMillis();
+                BookData book = new BookData();
+                //book.number = b.getIndex();
+                book.isbn = isbn;
+                book.name = info.getTitle().getTitle();
+                book.time = currentTmie;
+                book.save();
+                setResult(Activity.RESULT_OK);
+                Toast.makeText(BookDetailActivity.this,"保存成功",Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
 

@@ -1,6 +1,6 @@
 package com.example.linxj.xmlpull;
 
-import com.example.linxj.Model.Book;
+import com.example.linxj.Model.BookData;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -12,7 +12,7 @@ import java.io.InputStream;
  */
 public class BookXmlClass implements XmlPull {
     BookLab bookLab = null ;
-    Book book = null;
+    BookData book = null;
     @Override
     public BookLab parse(InputStream is) throws Exception {
        // List<Book> book;
@@ -30,17 +30,18 @@ public class BookXmlClass implements XmlPull {
                     case XmlPullParser.START_TAG:
 
                         if(parser.getName().equals("array")) {
-                            book = new Book();
+                            book = new BookData();
                            // i = 0;
                         }else if(parser.getName().equals("string")){
                             if(i == 0) {
                                 book.setName(parser.nextText());
                                 i++;
                             }else if(i == 1){
-                                book.setIbsn(parser.nextText());
+                                book.setIsbn(parser.nextText());
                                 i++;
-                            }else if(i == 2) {
-                                book.setIndex(parser.nextText());
+                            }
+                            else if(i == 2) {
+                                //book.setIndex(parser.nextText());
                                 i = 0;
                             }
 
