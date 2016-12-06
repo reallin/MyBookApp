@@ -1,6 +1,5 @@
 package com.example.linxj.xmlpull;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -17,6 +16,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.activeandroid.query.Delete;
+import com.activeandroid.query.Select;
 import com.example.linxj.Model.BookData;
 import com.example.linxj.Model.BookInfo;
 import com.example.linxj.com.example.linxj.ui.ProgressHUD;
@@ -30,6 +31,7 @@ import java.util.concurrent.Executors;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by linxj on 2015/9/19.
@@ -59,10 +61,14 @@ public class BookDetailActivity extends AppCompatActivity {
     public NetworkConnectStatus mNetworkStatus;
     @Bind(R.id.scrollView)
     ScrollView scrollView;
+    @Bind(R.id.bookDelete)
+    TextView mBookDelete;
     private ProgressHUD mProgressHUD;
     private boolean isAdd = false;
     private String isbn;
     private BookInfo info;
+    public static final int DELETE = 2;
+    public static final int ADD = 3;
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -99,9 +105,13 @@ public class BookDetailActivity extends AppCompatActivity {
 
         if (this.getIntent().hasExtra("addBook")) {//添加book
             mFab.setVisibility(View.VISIBLE);
+            mBookDelete.setClickable(false);
+            mBookDelete.setText("信息来自豆瓣");
             isAdd = true;
         } else {
             mFab.setVisibility(View.GONE);
+            mBookDelete.setClickable(true);
+            mBookDelete.setText("删除本书");
         }
         mNetworkStatus = new NetworkConnectStatus(BookDetailActivity.this);
         isbn = this.getIntent().getStringExtra("isbn");
@@ -132,33 +142,48 @@ public class BookDetailActivity extends AppCompatActivity {
             scrollView.setVisibility(View.GONE);
             Toast.makeText(BookDetailActivity.this, "请检查网络", Toast.LENGTH_SHORT).show();
 
-            /*Snackbar snackbar = Snackbar.make(view,"请检查网络",Snackbar.LENGTH_SHORT);
-            snackbar.show();
-            snackbar.setAction("取消", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(BookDetailActivity.this, "SnackBar action", Toast.LENGTH_SHORT).show();
-                }
-            });*/
 
         }
 
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                long currentTmie = SystemClock.currentThreadTimeMillis();
-                BookData book = new BookData();
-                //book.number = b.getIndex();
-                book.isbn = isbn;
-                book.name = info.getTitle().getTitle();
-                book.time = currentTmie;
-                book.save();
-                setResult(Activity.RESULT_OK);
-                Toast.makeText(BookDetailActivity.this,"保存成功",Toast.LENGTH_SHORT).show();
-                finish();
+                if(!isBookExit()) {
+                    long currentTmie = SystemClock.currentThreadTimeMillis();
+                    BookData book = new BookData();
+                    //book.number = b.getIndex();
+                    book.isbn = isbn;
+                    book.name = info.getTitle().getTitle();
+                    book.time = currentTmie;
+                    book.save();
+                    setResult(RESULT_OK);
+                    Toast.makeText(BookDetailActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
+                    finish();
+                }else{
+                    Toast.makeText(BookDetailActivity.this, "图书已存在", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
+    public boolean isBookExit(){
+        BookData sb = new Select().from(BookData.class).where("isbn = ?", isbn).executeSingle();
+        if(sb != null){
+            return true;
+        }
+        return false;
+    }
+
+    @OnClick(R.id.bookDelete)
+    public void deleteBook() {
+        try {
+            new Delete().from(BookData.class).where("isbn = ?", isbn).execute();
+            setResult(RESULT_OK);
+            Toast.makeText(BookDetailActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
+            finish();
+        } catch (Exception e) {
+            Toast.makeText(BookDetailActivity.this, "删除失败", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }

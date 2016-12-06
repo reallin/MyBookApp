@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -25,6 +26,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.query.Select;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import qr_codescan.MipcaActivityCapture;
+import utils.PermissionUtils;
 
 public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener {
     //private HashMap<String, String> map = new HashMap<String, String>();
@@ -59,13 +62,15 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
     StringBuilder sb;
     SharedPreferences sp;
     SharedPreferences.Editor edit;
+    private static final int PERMISSION_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-         sp = getSharedPreferences("firstEnter", Context.MODE_PRIVATE);
-         edit = sp.edit();
+        checkPermission();
+        sp = getSharedPreferences("firstEnter", Context.MODE_PRIVATE);
+        edit = sp.edit();
         initToolbar();
         initNavigationView();
         initData();
@@ -92,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                     Intent intent = new Intent(MainActivity.this, BookDetailActivity.class);
                     Bundle b = new Bundle();
                     b.putString("isbn", books.get(position).isbn);
-                    startActivity(intent.putExtras(b));
+                    startActivityForResult(intent.putExtras(b), SCANNIN_DETAIL);
 
                 }
             });
@@ -103,21 +108,56 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         }
     }
 
+    private void checkPermission() {
+        if (!PermissionUtils.isPreM()) {
+            requestAppPermission();
+        }
+    }
+
     /**
-    *初始化数据，第一次进入从xml中读取存数据库
-    *@author linxj
-    */
+     * 请求权限
+     *
+     * @author linxj
+     */
+    private void requestAppPermission() {
+        PermissionUtils.requestDangerousPermission(this, new PermissionUtils.OnPermissionRequestCallback() {
+            @Override
+            public void onAllPermissionGranted(boolean showRequestDialog) {
+                //startAnim();
+                //  Toast.makeText(MainActivity.this, "权限申请成功", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                if (!deniedPermissions.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "权限不够可能会有问题哦", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, PERMISSION_CODE);
+
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        PermissionUtils.handleRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    /**
+     * 初始化数据，第一次进入从xml中读取存数据库
+     *
+     * @author linxj
+     */
     private void initData() {
         try {
             books = null;
             InputStream is = getResources().getAssets().open("book.xml");
             lab = new BookXmlClass().parse(is);
             books = lab.getBooks();
-            if(sp.getBoolean("first",true)) {//确保只读一次
+            if (sp.getBoolean("first", true)) {//确保只读一次
                 saveAllInfo(books);
-                edit.putBoolean("first",false);
+                edit.putBoolean("first", false);
                 edit.commit();
-            }else{
+            } else {
                 books = getAllBooks();
             }
         } catch (Exception e) {
@@ -141,17 +181,16 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
             }
 
             ActiveAndroid.setTransactionSuccessful();
-            //Toast.makeText(MainActivity.this,"aa",Toast.LENGTH_LONG).show();
 
         } finally {
             ActiveAndroid.endTransaction();
         }
     }
 
-    public List<BookData> getAllBooks(){
+    public List<BookData> getAllBooks() {
         List<BookData> sb = new Select()
                 .from(BookData.class)
-                .orderBy("Time ASC")
+                .orderBy("Time DESC")
                 //.orderBy("Name ASC")
                 .execute();
         return sb;
@@ -178,10 +217,13 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                 switch (menuItem.getItemId()) {
                     case R.id.nav_blog:
                         //startActivity(new Intent(MainActivity.this, BlogActivity.class));
+                        Toast.makeText(MainActivity.this, "实验室位于南一楼702", Toast.LENGTH_LONG).show();
                         break;
                     case R.id.nav_ver:
+                        Toast.makeText(MainActivity.this, "当前版本 v1.0", Toast.LENGTH_LONG).show();
                         break;
                     case R.id.nav_about:
+                        Toast.makeText(MainActivity.this, "实验室图书管理系统", Toast.LENGTH_LONG).show();
                         break;
                 }
                 menuItem.setChecked(true);
@@ -251,17 +293,18 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
                     Intent intent = new Intent(MainActivity.this, BookDetailActivity.class);
                     Bundle b = new Bundle();
                     b.putString("isbn", isbn);
-                    b.putString("addBook","add");
-                    startActivityForResult(intent.putExtras(b),SCANNIN_DETAIL);
-
+                    b.putString("addBook", "add");
+                    startActivityForResult(intent.putExtras(b), SCANNIN_DETAIL);
                 }
                 break;
             case SCANNIN_DETAIL:
-                if(resultCode == RESULT_OK){
-                    getAllBooks();
+                if (resultCode == RESULT_OK) {
+                    books = getAllBooks();
+                    myAdapter.setList(books);
                     myAdapter.notifyDataSetChanged();
                 }
-            break;
+                break;
+
         }
     }
 
@@ -290,7 +333,6 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         });
         return true;
     }
-
 
 
     @Override
@@ -322,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
      /*   if (id == R.id.action_settings) {
             return true;
         }*/
-        if(id == R.id.action_search){
+        if (id == R.id.action_search) {
 
             SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -351,10 +393,10 @@ public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuIte
         return super.onOptionsItemSelected(item);
     }
 
-    public List<BookData> simpleSearch(String str){
+    public List<BookData> simpleSearch(String str) {
         List<BookData> sb = new Select()
                 .from(BookData.class)
-                .where("Name like ?","%"+str+"%")
+                .where("Name like ?", "%" + str + "%")
                 .orderBy("Time ASC")
                 .execute();
         return sb;
